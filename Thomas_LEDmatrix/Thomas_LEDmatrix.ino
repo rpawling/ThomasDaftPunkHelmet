@@ -26,6 +26,8 @@
 #include "OkProgram.h"
 #include "SineProgram.h"
 #include "EkgProgram.h"
+#include "ArrowProgram.h"
+#include "UfoProgram.h"
 #include "Alphabet.h"
 
 /* 
@@ -56,6 +58,9 @@ void setup() {
 // --------------------------------------------
 // This main loop is called after setup and repeated by Arduino
 void loop() {
+  ufo_program();
+  arrow_program();
+  print_string("$");
   print_string("GET LUCKY");
   print_string("HAPPY HALLOWEEN!");
   print_string("CHELSEA IS A BAMF");
@@ -270,6 +275,16 @@ void eyes_program() {
 void ok_program() {
   animate_array(ok_array, OK_FRAMES, OK_ROWS, OK_DELAY);
   delay(1000);
+}
+
+void ufo_program() {
+  animate_array(ufo_array, UFO_FRAMES, UFO_ROWS, UFO_DELAY);
+}
+
+void arrow_program() {
+  for(int i=0;i<5;i++) {
+    animate_array(arrow_array, ARROW_FRAMES, ARROW_ROWS, ARROW_DELAY);
+  }
 }
 
 void ekg_program() {
