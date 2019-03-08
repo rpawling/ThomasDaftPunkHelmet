@@ -19,17 +19,21 @@
 
 // include the library for MAX72XX control
 #include "LedControl.h"
+#include <SoftwareSerial.h>
 
 // include headers for animation data arrays
 #include "HeartProgram.h"
 #include "EyesProgram.h"
 #include "OkProgram.h"
-#include "SineProgram.h"
 #include "EkgProgram.h"
 #include "ArrowProgram.h"
-#include "UfoProgram.h"
+//#include "UfoProgram.h"
 #include "Alphabet.h"
 
+
+SoftwareSerial Bluetooth(5, 6); // RX, TX
+int LED = 2; // the on-board LED
+char state = 'd';
 /* 
  * Led control class
  * We use pins 12,11 and 10 on the Arduino for the SPI interface
@@ -51,30 +55,76 @@ void setup() {
       lc.setIntensity(index, 10);
       lc.clearDisplay(index);
   }
+  Bluetooth.begin(9600);
   Serial.begin(9600);
+  Bluetooth.println("init...");
+  pinMode(LED,OUTPUT);
 }
 
 // Main loop
 // --------------------------------------------
 // This main loop is called after setup and repeated by Arduino
 void loop() {
-  ufo_program();
-  arrow_program();
-  print_string("$");
-  print_string("GET LUCKY");
-  print_string("HAPPY HALLOWEEN!");
-  print_string("CHELSEA IS A BAMF");
-  print_string("DAFT PUNK");
-  //ekg_program();
-  //ok_program();
-  //heart_program();
-  //eyes_program();
-  for(int i=0; i<2; i++) {
-    //dot_program();
+  bluetooth_receiver();
+  
+
+  if(state == 'd') {
+    dot_program();
+  } else if(state == 'u') {
+    ufo_program();
+  } else if(state == 'a') {
+    arrow_program();
+  } else if(state == 'k') {
+    ekg_program();
+  } else if(state == 'o') {
+    ok_program();
+  } else if(state == 'h') {
+    heart_program();
+  } else if(state == 'e') {
+    eyes_program();
+  } else if(state == 't') {
+    test_program();
+  } else if(state == 'l') {
+    //ufo_program();
+    bluetooth_receiver();
+    arrow_program();
+    bluetooth_receiver();
+    dot_program();
+    bluetooth_receiver();
+    print_string("GET LUCKY");
+    bluetooth_receiver();
+    ekg_program();
+    bluetooth_receiver();
+    ok_program();
+    bluetooth_receiver();
+    print_string("HAPPY HALLOWEEN!");
+    bluetooth_receiver();
+    heart_program();
+    bluetooth_receiver();
+    eyes_program();
+    bluetooth_receiver();
+    print_string("DAFT PUNK");
+  } else if(state == 'c') {
+    clear_display();
+    delay(1000);
+  } else {
+    Bluetooth.println("?");
   }
-  //test_program();
-  //sine_wave_program();
-  //static_program();
+
+}
+
+void bluetooth_receiver() {
+  if (Bluetooth.available()){ //wait for data received
+    String str = Bluetooth.readStringUntil('\n');
+    str.trim();
+    if(str.length() == 1) {
+      state = str[0];
+      Bluetooth.println("state: " + state);
+    } else {
+      print_string(str);
+    } 
+  }
+  delay(100);
 }
 
 // print string
@@ -83,6 +133,7 @@ void loop() {
 // Supported characters: A-Z,!,$,?
 // str        - "String to be passed across the screen"
 void print_string(String str) {
+  Bluetooth.println("str: " + str);
   // Add a buffer so full text can be read
   str = str + "      ";
   byte buff[Y_WIDTH][C_COUNT] = {{0x00, 0x00, 0x00, 0x00},{0x00, 0x00, 0x00, 0x00},{0x00, 0x00, 0x00, 0x00},{0x00, 0x00, 0x00, 0x00}};
@@ -168,6 +219,7 @@ void draw_pixel(int x, int y, bool on) {
 // --------------------------------------------
 // Simply clear LED matrix of all pixels
 void clear_display() {
+  Bluetooth.println("clear");
   for(int index=0;index<lc.getDeviceCount();index++) {
     lc.clearDisplay(index);
   }
@@ -178,6 +230,7 @@ void clear_display() {
 // display programs go below here
 
 void dot_program() {
+  Bluetooth.println("dot");
   clear_display();
   // Send dot right
   for (int index=0; index<34; index++) {
@@ -202,6 +255,7 @@ void dot_program() {
 }
 
 void test_program() {
+  Bluetooth.println("test");
   //Test line horizontal scroll
   for(int chip=0;chip<lc.getDeviceCount();chip++) {
     for(int col=7;col>=0;col--) {
@@ -243,6 +297,7 @@ void test_program() {
 }
 
 void static_program() {
+  Bluetooth.println("static");
   int num_rows = 6;
   for (int i=0; i<50; i++) {
     for(int row=0; row<num_rows; row++) {
@@ -254,40 +309,40 @@ void static_program() {
   }
 }
 
-void sine_wave_program() {
-  for (int i=0;i<5;i++) {
-    animate_array(sine_array, 10, 8, 50);
-  }
-}
-
 void heart_program() {
-  for(int i=0;i<5;i++) {
+  Bluetooth.println("heart");
+  for(int i=0;i<8;i++) {
     animate_array(heart_array, HEART_FRAMES, HEART_ROWS, HEART_DELAY);
   }
 }
 
 void eyes_program() {
-  for(int i=0;i<5;i++) {
+  Bluetooth.println("eyes");
+  for(int i=0;i<8;i++) {
     animate_array(eyes_array, EYES_FRAMES, EYES_ROWS, EYES_DELAY);
   }
 }
 
 void ok_program() {
+  Bluetooth.println("ok");
   animate_array(ok_array, OK_FRAMES, OK_ROWS, OK_DELAY);
   delay(1000);
 }
 
 void ufo_program() {
-  animate_array(ufo_array, UFO_FRAMES, UFO_ROWS, UFO_DELAY);
+  //Bluetooth.println("ufo");
+  //animate_array(ufo_array, UFO_FRAMES, UFO_ROWS, UFO_DELAY);
 }
 
 void arrow_program() {
-  for(int i=0;i<5;i++) {
+  Bluetooth.println("arrow");
+  for(int i=0;i<8;i++) {
     animate_array(arrow_array, ARROW_FRAMES, ARROW_ROWS, ARROW_DELAY);
   }
 }
 
 void ekg_program() {
+  Bluetooth.println("ekg");
   clear_display();
   delay(100);
   byte mask[] = {0x00, 0x00, 0x00, 0x00};
